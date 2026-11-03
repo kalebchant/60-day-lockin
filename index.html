@@ -8,9 +8,9 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Lock-in" />
-  <link rel="manifest" href="/60-day-lockin/manifest.webmanifest" />
-  <link rel="apple-touch-icon" href="/60-day-lockin/apple-touch-icon.png" />
-  <link rel="icon" type="image/png" sizes="192x192" href="/60-day-lockin/icon-192.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
   <title>Lock-in</title>
   <style>
     :root {
@@ -227,6 +227,8 @@
       stepsDay: 0,
       data: load(),
     };
+    // Drop any stale saved day selection (e.g. stuck on Tuesday from testing).
+    ["dayId", "selectedDay", "selected", "currentDay", "lastDay"].forEach((k) => { if (state.data && k in state.data) delete state.data[k]; });
 
     function todayKey() {
       const d = new Date();
@@ -284,7 +286,10 @@
     function blockDiff() { return Math.round((todayMidnight() - BLOCK_START) / 86400000); }
     function blockDay() { const d = blockDiff(); return d < 0 ? 0 : Math.min(BLOCK_DAYS, d + 1); }
     function blockWeek() { const d = blockDiff(); return d < 0 ? 0 : Math.min(9, Math.floor(d / 7) + 1); }
+    // Before Block 1 (Mon 9 Nov 2026) the app treats Monday (Push) as "today" for testing;
+    // from 9 Nov onward it follows the real weekday.
     function focusIndex() { return blockDiff() < 0 ? 0 : todayIndex(); }
+    state.dayId = (DAYS.find((d) => d.weekday === WEEK_FULL[focusIndex()]) || DAYS[0]).id;
     // A day is fully done once its steps are logged; each one charges the ring 1/60.
     function daysDone() {
       const store = stepsStore(); let n = 0;
@@ -367,15 +372,14 @@
       prog.onclick = () => backToProgress();
       wrap.appendChild(prog);
       wrap.appendChild(el('<h1>Workout guide<span class="dot">.</span></h1>'));
-      const ti = todayIndex();
       const fi = focusIndex();
-      const pre = blockDiff() < 0;
+      const ti = fi;
       DAYS.forEach((d) => {
         const isToday = WEEK_FULL[fi] === d.weekday;
         const card = el('<div class="card tap"><div class="row"><div class="icon"></div><div class="grow"><div class="weekday"></div><div class="label"></div><div class="tag"></div></div><div class="chev">›</div></div></div>');
         card.classList.add(isToday ? "gold" : "sky");
         const ic = document.createElement("span"); ic.className = "emo"; ic.textContent = d.emoji; card.querySelector(".icon").appendChild(ic);
-        card.querySelector(".weekday").textContent = d.weekday + (isToday ? (pre ? " · day 1" : " · today") : "");
+        card.querySelector(".weekday").textContent = d.weekday + (isToday ? " · today" : "");
         card.querySelector(".label").textContent = d.label;
         card.querySelector(".tag").textContent = d.tagline;
         card.onclick = () => {
@@ -607,7 +611,7 @@
     }
 
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/60-day-lockin/sw.js", { scope: "/60-day-lockin/" }).catch(() => {});
+      navigator.serviceWorker.register("./sw.js").catch(() => {});
     }
     try { history.replaceState({ screen: "progress" }, "", location.href); } catch (e) {}
     render();

@@ -1,12 +1,5 @@
-const CACHE = "gym-logger-v6";
-const ASSETS = [
-  "/60-day-lockin/",
-  "/60-day-lockin/index.html",
-  "/60-day-lockin/manifest.webmanifest",
-  "/60-day-lockin/icon-192.png",
-  "/60-day-lockin/icon-512.png",
-  "/60-day-lockin/apple-touch-icon.png",
-];
+const CACHE = "gym-logger-v7";
+const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });

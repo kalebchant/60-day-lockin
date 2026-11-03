@@ -1,0 +1,16 @@
+{
+  "name": "60-Day Lock-in",
+  "short_name": "Gym",
+  "description": "Kaleb 60-day lock-in: progress + gym logger",
+  "id": "/60-day-lockin/",
+  "start_url": "/60-day-lockin/",
+  "scope": "/60-day-lockin/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#08090A",
+  "theme_color": "#08090A",
+  "icons": [
+    { "src": "/60-day-lockin/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/60-day-lockin/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

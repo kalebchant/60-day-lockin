@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="theme-color" content="#08090A" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Lock-in" />
+  <link rel="manifest" href="/60-day-lockin/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/60-day-lockin/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/60-day-lockin/icon-192.png" />
+  <title>Lock-in</title>
+  <style>
+    :root {
+      --navy: #111214;
+      --card: linear-gradient(160deg, #1C1D21 0%, #141518 100%);
+      --line: rgba(79,195,255,0.6);
+      --text: #FFFFFF;
+      --muted: #A9B4C2;
+      --yellow: #D9B25F;
+      --yellow2: #EBD39A;
+      --blue: #4FC3FF;
+      --blue2: #8FDBFF;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bot: env(safe-area-inset-bottom, 0px);
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0; padding: 0; min-height: 100%;
+      background: #08090A;
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    }
+    body {
+      min-height: 100dvh;
+      background:
+        radial-gradient(120% 50% at 100% 0%, rgba(79,195,255,0.10) 0%, rgba(79,195,255,0) 60%),
+        linear-gradient(180deg, #08090A 0%, #111215 55%, #1A1B1F 100%);
+      background-attachment: fixed;
+    }
+    #app {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: calc(18px + var(--safe-top)) 16px calc(28px + var(--safe-bot));
+      min-height: 100dvh;
+    }
+    h1 { margin: 0 0 6px; font-size: 32px; font-weight: 900; letter-spacing: -0.02em; }
+    h1 .dot, h1 .tick { color: var(--yellow); }
+    h2 { margin: 0; font-size: 24px; font-weight: 900; }
+    .sub { margin: 0 0 16px; color: var(--blue2); font-size: 14px; font-weight: 700; }
+    .card {
+      background: var(--card);
+      border: 1.5px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 10px 26px rgba(0,0,0,0.4), 0 0 18px rgba(79,195,255,0.18);
+    }
+    .card.sky { border-left: 5px solid var(--blue); }
+    .card.gold { border-left: 5px solid var(--yellow); }
+    .card.tap { cursor: pointer; }
+    .card.tap:active { transform: scale(0.985); }
+    .row { display: flex; align-items: center; gap: 14px; }
+    .icon {
+      width: 54px; height: 54px; border-radius: 16px;
+      display: grid; place-items: center; font-size: 27px;
+      background: linear-gradient(145deg, #2A2620 0%, #1D1B18 100%);
+      border: 1px solid rgba(217,178,95,0.28);
+      box-shadow: none;
+      flex-shrink: 0;
+    }
+    .emo { display: inline-block; }
+    .grow { flex: 1; min-width: 0; }
+    .weekday { font-size: 12px; font-weight: 900; color: var(--blue); letter-spacing: 0.08em; text-transform: uppercase; }
+    .label { font-size: 22px; font-weight: 900; }
+    .tag { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .chev { color: var(--yellow); font-size: 28px; font-weight: 900; }
+    .btn {
+      width: 100%; border: none; border-radius: 14px; padding: 16px;
+      font-size: 16px; font-weight: 900; cursor: pointer; margin-top: 10px;
+    }
+    .btn.primary {
+      background: linear-gradient(90deg, #B8913F 0%, var(--yellow) 45%, var(--yellow2) 100%);
+      color: var(--navy);
+      box-shadow: 0 6px 22px rgba(217,178,95,0.5);
+    }
+    .btn.primary:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+    .btn.quiet {
+      background: rgba(79,195,255,0.16);
+      border: 1.5px solid var(--blue);
+      color: var(--text); font-weight: 800; padding: 12px 16px; margin-top: 8px;
+    }
+    .pill {
+      display: inline-block; padding: 6px 12px; border-radius: 999px;
+      background: var(--yellow); color: var(--navy);
+      font-size: 11px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase;
+      box-shadow: 0 0 14px rgba(217,178,95,0.55);
+    }
+    .pill.sky { background: var(--blue); box-shadow: 0 0 14px rgba(79,195,255,0.55); }
+    .sets { display: flex; gap: 8px; margin: 14px 0; flex-wrap: wrap; }
+    .setchip {
+      flex: 1 1 0; min-width: 70px; padding: 12px 8px; border-radius: 14px;
+      border: 1.5px solid rgba(79,195,255,0.55);
+      background: rgba(28,29,33,0.9); color: var(--text);
+      font-weight: 900; cursor: pointer;
+    }
+    .setchip small { display: block; margin-top: 4px; font-size: 11px; color: var(--blue2); font-weight: 800; }
+    .setchip.active { border: 2.5px solid var(--yellow); background: rgba(79,195,255,0.22); box-shadow: 0 0 16px rgba(217,178,95,0.45); }
+    .setchip.active small { color: var(--yellow2); }
+    .setchip.filled { background: var(--yellow); color: var(--navy); }
+    .setchip.filled small { color: var(--navy); }
+    .fields { display: flex; gap: 10px; }
+    label.field { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    label.field span { font-size: 12px; font-weight: 800; color: var(--blue2); letter-spacing: 0.03em; }
+    input {
+      width: 100%; border-radius: 12px; border: 2px solid rgba(79,195,255,0.7);
+      background: #0E0F12; color: var(--yellow2);
+      padding: 14px 12px; font-size: 22px; font-weight: 800;
+    }
+    input:focus { outline: none; border-color: var(--yellow); box-shadow: 0 0 14px rgba(217,178,95,0.45); }
+    .toast {
+      margin-top: 10px; padding: 11px 12px; border-radius: 12px;
+      background: rgba(217,178,95,0.18); border: 1.5px solid var(--yellow);
+      color: var(--yellow2); font-size: 13px; font-weight: 800;
+    }
+    .num {
+      width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center;
+      background: var(--blue); color: var(--navy); font-weight: 900; font-size: 14px; flex-shrink: 0;
+      box-shadow: 0 0 12px rgba(79,195,255,0.5);
+    }
+    .num.done { background: var(--yellow); box-shadow: 0 0 12px rgba(217,178,95,0.6); }
+    .status { font-size: 12px; margin-top: 6px; color: var(--blue2); font-weight: 900; }
+    .status.go { color: var(--yellow); }
+    .status.mid { color: var(--blue); }
+    .logline { display: flex; justify-content: space-between; padding: 6px 0; border-top: 1px solid rgba(79,195,255,0.22); font-size: 14px; color: var(--muted); }
+    .logline:first-of-type { border-top: none; }
+    .kg { font-weight: 900; color: var(--yellow); }
+    .stepshead { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin: 22px 0 10px; }
+    .weektotal { font-size: 13px; font-weight: 800; color: var(--yellow); }
+    .week { display: flex; gap: 6px; flex-wrap: wrap; }
+    .daychip {
+      flex: 1 1 0; min-width: 40px; padding: 10px 2px; border-radius: 12px;
+      border: 1.5px solid rgba(79,195,255,0.55); background: rgba(79,195,255,0.12);
+      color: var(--text); font-weight: 900; font-size: 13px; cursor: pointer;
+    }
+    .daychip small { display: block; margin-top: 4px; font-size: 10px; font-weight: 800; color: var(--blue2); }
+    .daychip.today { border: 2px solid var(--yellow); }
+    .daychip.logged, .daychip.sel { background: var(--yellow); color: var(--navy); }
+    .daychip.logged small, .daychip.sel small { color: var(--navy); }
+    .navpill {
+      display: inline-block; padding: 8px 14px; border-radius: 999px; margin-bottom: 12px;
+      border: 1.5px solid var(--yellow); background: rgba(217,178,95,0.14);
+      color: var(--yellow2); font-size: 13px; font-weight: 900; cursor: pointer;
+    }
+    .ringwrap { display: flex; flex-direction: column; align-items: center; margin-top: 14vh; }
+    .ringwrap svg { width: 100%; max-width: 320px; display: block; }
+    .ringnav { text-align: center; margin-top: 44px; }
+    .ringnav button {
+      padding: 14px 40px; border-radius: 999px; background: rgba(217,178,95,0.12);
+      border: 1.5px solid rgba(217,178,95,0.7); color: var(--yellow); font-size: 17px; font-weight: 900; letter-spacing: 0.02em; cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    const DAYS = [
+      { id: "push", weekday: "Monday", label: "Push", tagline: "Chest · shoulders · triceps", emoji: "🏋️",
+        exercises: [
+          { id: "p1", name: "Incline dumbbell press (30°)", sets: 3, repRange: "6–10", rest: "2–3 min" },
+          { id: "p2", name: "Machine chest press / flat DB press", sets: 3, repRange: "8–12", rest: "2 min" },
+          { id: "p3", name: "Shoulder press (machine or DB)", sets: 3, repRange: "8–12", rest: "2 min" },
+          { id: "p4", name: "Lateral raise (cable or DB)", sets: 3, repRange: "12–15", rest: "60–90 s" },
+          { id: "p5", name: "Tricep pushdown (rope)", sets: 3, repRange: "10–15", rest: "60–90 s" },
+        ]},
+      { id: "pull", weekday: "Tuesday", label: "Pull", tagline: "Back · rear delts · biceps", emoji: "💪",
+        exercises: [
+          { id: "u1", name: "Lat pulldown / pull-ups", sets: 3, repRange: "8–12", rest: "2–3 min" },
+          { id: "u2", name: "Seated cable row", sets: 3, repRange: "8–12", rest: "2 min" },
+          { id: "u3", name: "Rear delt fly", sets: 3, repRange: "12–15", rest: "60–90 s" },
+          { id: "u4", name: "Preacher curl", sets: 3, repRange: "8–12", rest: "60–90 s" },
+          { id: "u5", name: "Hammer curl", sets: 2, repRange: "10–12", rest: "60–90 s" },
+        ]},
+      { id: "legs", weekday: "Wednesday", label: "Legs", tagline: "Quads · hams · glutes · calves", emoji: "🦵",
+        exercises: [
+          { id: "l1", name: "Hack squat / barbell squat", sets: 3, repRange: "6–10", rest: "2–3 min" },
+          { id: "l2", name: "Romanian deadlift", sets: 3, repRange: "8–10", rest: "2–3 min" },
+          { id: "l3", name: "Leg press", sets: 2, repRange: "10–12", rest: "2 min" },
+          { id: "l4", name: "Leg extension", sets: 2, repRange: "12–15", rest: "60–90 s" },
+          { id: "l5", name: "Seated hamstring curl", sets: 3, repRange: "10–12", rest: "60–90 s" },
+          { id: "l6", name: "Calf raise", sets: 2, repRange: "10–15", rest: "60 s" },
+        ]},
+      { id: "upper", weekday: "Thursday", label: "Upper", tagline: "Full upper · session 2", emoji: "🔥",
+        exercises: [
+          { id: "up1", name: "Flat DB / machine press", sets: 3, repRange: "8–10", rest: "2–3 min" },
+          { id: "up2", name: "Chest-supported / T-bar row", sets: 3, repRange: "8–12", rest: "2 min" },
+          { id: "up3", name: "Pec deck / cable fly", sets: 2, repRange: "12–15", rest: "60–90 s" },
+          { id: "up4", name: "Neutral-grip pulldown", sets: 2, repRange: "10–12", rest: "90 s" },
+          { id: "up5", name: "Lateral raise", sets: 2, repRange: "12–15", rest: "60–90 s" },
+          { id: "up6", name: "Curl + overhead tricep (superset)", sets: 3, repRange: "10–15 each", rest: "60 s / round" },
+        ]},
+      { id: "lower", weekday: "Friday", label: "Lower", tagline: "Legs · heavier · glutes", emoji: "⚡",
+        exercises: [
+          { id: "lo1", name: "Barbell / Smith squat / leg press", sets: 3, repRange: "6–8", rest: "3 min" },
+          { id: "lo2", name: "Hip thrust", sets: 3, repRange: "8–12", rest: "2 min" },
+          { id: "lo3", name: "Walking lunges (DB)", sets: 2, repRange: "10 / leg", rest: "90 s" },
+          { id: "lo4", name: "Lying hamstring curl", sets: 3, repRange: "10–12", rest: "60–90 s" },
+          { id: "lo5", name: "Standing calf raise", sets: 3, repRange: "10–15", rest: "60 s" },
+        ]},
+    ];
+
+    const STORE = "gym-logger-v1";
+    function load() {
+      try { return JSON.parse(localStorage.getItem(STORE) || "{}"); } catch { return {}; }
+    }
+    function save(data) { localStorage.setItem(STORE, JSON.stringify(data)); }
+
+    const state = {
+      screen: "progress",
+      dayId: "push",
+      exIndex: 0,
+      activeSet: 0,
+      toast: "",
+      draftSteps: "",
+      stepsDay: 0,
+      data: load(),
+    };
+
+    function todayKey() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return y + "-" + m + "-" + day;
+    }
+
+    function day() { return DAYS.find((d) => d.id === state.dayId); }
+    function exercise() { return day().exercises[state.exIndex]; }
+
+    function emptySets(n) { return Array.from({ length: n }, () => ({ weight: "", reps: "" })); }
+
+    function sessionKey() {
+      return todayKey() + ":" + state.dayId;
+    }
+
+    function getSession() {
+      const key = sessionKey();
+      if (!state.data.sessions) state.data.sessions = {};
+      if (!state.data.sessions[key]) state.data.sessions[key] = { sets: {}, steps: "", finishedAt: null };
+      return state.data.sessions[key];
+    }
+
+    function getSets(exId, n) {
+      const sess = getSession();
+      if (!sess.sets[exId] || sess.sets[exId].length !== n) sess.sets[exId] = emptySets(n);
+      return sess.sets[exId];
+    }
+
+    function persist() { save(state.data); render(); }
+
+    function el(html) {
+      const t = document.createElement("template");
+      t.innerHTML = html.trim();
+      return t.content.firstElementChild;
+    }
+
+    const WEEK = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const WEEK_FULL = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    function dateKey(d) {
+      return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
+    function todayIndex() { const js = new Date().getDay(); return js === 0 ? 6 : js - 1; }
+    function weekDates() {
+      const now = new Date();
+      const mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() - todayIndex());
+      return WEEK.map((_, i) => new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i));
+    }
+    // Block 1: Mon 9 Nov 2026 (Brisbane / device local), 60 days.
+    const BLOCK_START = new Date(2026, 10, 9);
+    const BLOCK_DAYS = 60;
+    function todayMidnight() { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); }
+    function blockDiff() { return Math.round((todayMidnight() - BLOCK_START) / 86400000); }
+    function blockDay() { const d = blockDiff(); return d < 0 ? 0 : Math.min(BLOCK_DAYS, d + 1); }
+    function blockWeek() { const d = blockDiff(); return d < 0 ? 0 : Math.min(9, Math.floor(d / 7) + 1); }
+    function focusIndex() { return blockDiff() < 0 ? 0 : todayIndex(); }
+    // A day is fully done once its steps are logged; each one charges the ring 1/60.
+    function daysDone() {
+      const store = stepsStore(); let n = 0;
+      const today = todayMidnight();
+      for (let i = 0; i < BLOCK_DAYS; i++) {
+        const d = new Date(BLOCK_START.getFullYear(), BLOCK_START.getMonth(), BLOCK_START.getDate() + i);
+        if (d > today) break;
+        if (String(store[dateKey(d)] || "").trim()) n++;
+      }
+      return n;
+    }
+    function stepsStore() { if (!state.data.steps) state.data.steps = {}; return state.data.steps; }
+    function fmtSteps(v) {
+      const n = Number(String(v || "").replace(/[^0-9]/g, ""));
+      if (!String(v || "").trim() || isNaN(n)) return "—";
+      return n.toLocaleString("en-AU");
+    }
+    function finishSession() {
+      const d = day(); const sess = getSession();
+      sess.finishedAt = new Date().toISOString(); sess.weekday = d.weekday; sess.label = d.label;
+      save(state.data);
+    }
+    function openSteps(i) {
+      state.stepsDay = i;
+      state.draftSteps = stepsStore()[dateKey(weekDates()[i])] || "";
+      state.toast = ""; state.screen = "steps"; render();
+    }
+
+    // Single-page app: every view lives at the same URL. Views switch in place;
+    // history.pushState keeps the URL unchanged so the phone back gesture returns to Progress.
+    function go(screen) {
+      state.screen = screen;
+      try { history.pushState({ screen: screen }, "", location.href); } catch (e) {}
+      render(); window.scrollTo(0, 0);
+    }
+    function backToProgress() {
+      if (history.state && history.state.screen && history.state.screen !== "progress") { history.back(); return; }
+      state.screen = "progress"; render(); window.scrollTo(0, 0);
+    }
+    window.addEventListener("popstate", (e) => {
+      const st = e.state && e.state.screen;
+      state.screen = (st && st !== "progress") ? "home" : "progress";
+      render(); window.scrollTo(0, 0);
+    });
+
+    function render() {
+      const root = document.getElementById("app");
+      root.innerHTML = "";
+      if (state.screen === "progress") root.appendChild(viewProgress());
+      else if (state.screen === "home") root.appendChild(viewHome());
+      else if (state.screen === "day") root.appendChild(viewDay());
+      else if (state.screen === "exercise") root.appendChild(viewExercise());
+      else if (state.screen === "steps") root.appendChild(viewSteps());
+      else root.appendChild(viewDone());
+    }
+
+    function viewProgress() {
+      const wrap = el('<div class="home"></div>');
+      // X = Block-1 days fully done (steps logged); each one charges the ring 1/60.
+      const done = daysDone();
+      const frac = Math.max(0, Math.min(1, done / BLOCK_DAYS));
+      const r = 120, c = 2 * Math.PI * r;
+      const arc = frac > 0
+        ? '<circle cx="150" cy="150" r="120" fill="none" stroke="#4FC3FF" stroke-width="18" stroke-linecap="round" stroke-dasharray="' + (c * frac) + ' ' + c + '" transform="rotate(-90 150 150)" style="filter:drop-shadow(0 0 8px rgba(79,195,255,0.6))"/>'
+        : '';
+      const ring = el('<div class="ringwrap"><svg viewBox="0 0 300 300">' +
+        '<circle cx="150" cy="150" r="120" fill="none" stroke="rgba(79,195,255,0.16)" stroke-width="18"/>' + arc +
+        '<text x="150" y="150" text-anchor="middle" dominant-baseline="central" fill="#FFFFFF" font-size="56" font-weight="900" letter-spacing="-1">Day ' + done + '</text>' +
+        '</svg></div>');
+      wrap.appendChild(ring);
+      const nav = el('<div class="ringnav"><button type="button">Workouts</button></div>');
+      nav.querySelector("button").onclick = () => go("home");
+      wrap.appendChild(nav);
+      return wrap;
+    }
+
+    function viewHome() {
+      const wrap = el('<div></div>');
+      const prog = el('<button class="navpill" type="button">‹ Progress</button>');
+      prog.onclick = () => backToProgress();
+      wrap.appendChild(prog);
+      wrap.appendChild(el('<h1>Workout guide<span class="dot">.</span></h1>'));
+      const ti = todayIndex();
+      const fi = focusIndex();
+      const pre = blockDiff() < 0;
+      DAYS.forEach((d) => {
+        const isToday = WEEK_FULL[fi] === d.weekday;
+        const card = el('<div class="card tap"><div class="row"><div class="icon"></div><div class="grow"><div class="weekday"></div><div class="label"></div><div class="tag"></div></div><div class="chev">›</div></div></div>');
+        card.classList.add(isToday ? "gold" : "sky");
+        const ic = document.createElement("span"); ic.className = "emo"; ic.textContent = d.emoji; card.querySelector(".icon").appendChild(ic);
+        card.querySelector(".weekday").textContent = d.weekday + (isToday ? (pre ? " · day 1" : " · today") : "");
+        card.querySelector(".label").textContent = d.label;
+        card.querySelector(".tag").textContent = d.tagline;
+        card.onclick = () => {
+          state.dayId = d.id; state.exIndex = 0; state.activeSet = 0; state.toast = ""; state.screen = "day"; render();
+        };
+        wrap.appendChild(card);
+      });
+
+      const dates = weekDates();
+      const store = stepsStore();
+      let total = 0;
+      dates.forEach((dt) => { const n = Number(String(store[dateKey(dt)] || "").replace(/[^0-9]/g, "")); if (!isNaN(n)) total += n; });
+      const head = el('<div class="stepshead"><h2><span class="emo">👟</span> Steps</h2><span class="weektotal"></span></div>');
+      head.querySelector(".weektotal").textContent = "Week " + blockWeek() + " · " + total.toLocaleString("en-AU") + " steps";
+      wrap.appendChild(head);
+      const card = el('<div class="card gold"><div class="week"></div></div>');
+      const week = card.querySelector(".week");
+      WEEK.forEach((w, i) => {
+        const v = store[dateKey(dates[i])] || "";
+        const chip = el('<button class="daychip" type="button"><div></div><small></small></button>');
+        if (v) chip.classList.add("logged");
+        if (i === ti) chip.classList.add("today");
+        chip.querySelector("div").textContent = w;
+        chip.querySelector("small").textContent = v ? fmtSteps(v) : "+";
+        chip.onclick = () => openSteps(i);
+        week.appendChild(chip);
+      });
+      wrap.appendChild(card);
+      const logBtn = el('<button class="btn primary" type="button"></button>');
+      logBtn.textContent = "Log steps · " + WEEK_FULL[ti];
+      logBtn.onclick = () => openSteps(ti);
+      wrap.appendChild(logBtn);
+      return wrap;
+    }
+
+    function viewDay() {
+      const d = day();
+      const wrap = el('<div></div>');
+      const back = el('<button class="btn quiet" type="button">‹ Workout guide</button>');
+      back.onclick = () => { state.screen = "home"; render(); };
+      wrap.appendChild(back);
+      wrap.appendChild(el('<div style="margin-top:14px"><span class="pill"></span></div>'));
+      wrap.querySelector(".pill").textContent = d.weekday;
+      const dh = el('<h1 style="margin-top:10px"><span class="emo"></span><span></span></h1>');
+      dh.children[0].textContent = d.emoji; dh.children[1].textContent = " " + d.label;
+      wrap.appendChild(dh);
+      wrap.appendChild(el('<p class="sub"></p>'));
+      wrap.querySelector(".sub").textContent = d.tagline;
+
+      d.exercises.forEach((ex, i) => {
+        const sets = getSets(ex.id, ex.sets);
+        const done = sets.every((s) => s.weight && s.reps);
+        const partial = sets.some((s) => s.weight || s.reps);
+        const card = el('<div class="card tap"><div class="row" style="align-items:flex-start;gap:12px"><div class="num"></div><div class="grow"><div class="label" style="font-size:16px;font-weight:800;line-height:1.3"></div><div class="tag"></div><div class="status"></div></div></div></div>');
+        card.classList.add(done ? "gold" : "sky");
+        const num = card.querySelector(".num");
+        num.textContent = done ? "✓" : String(i + 1);
+        if (done) num.classList.add("done");
+        card.querySelector(".label").textContent = ex.name;
+        card.querySelector(".tag").textContent = ex.sets + " sets · " + ex.repRange + " · rest " + ex.rest;
+        const st = card.querySelector(".status");
+        st.textContent = done ? "Logged" : partial ? "In progress" : "Tap to log";
+        st.className = "status " + (done ? "go" : partial ? "mid" : "");
+        card.onclick = () => { state.exIndex = i; state.activeSet = 0; state.toast = ""; state.screen = "exercise"; render(); };
+        wrap.appendChild(card);
+      });
+
+      const finish = el('<button class="btn primary" type="button">Finish workout</button>');
+      finish.onclick = () => { finishSession(); state.screen = "done"; render(); };
+      wrap.appendChild(finish);
+      return wrap;
+    }
+
+    function viewExercise() {
+      const d = day();
+      const ex = exercise();
+      const sets = getSets(ex.id, ex.sets);
+      const wrap = el('<div></div>');
+      const back = el('<button class="btn quiet" type="button"></button>');
+      back.textContent = "‹ " + d.label;
+      back.onclick = () => { state.screen = "day"; render(); };
+      wrap.appendChild(back);
+      wrap.appendChild(el('<div style="margin-top:14px"><span class="pill sky"></span></div>'));
+      wrap.querySelector(".pill").textContent = "Exercise " + (state.exIndex + 1) + " / " + d.exercises.length;
+      wrap.appendChild(el('<h1 style="font-size:25px;margin-top:10px;line-height:1.25"></h1>'));
+      wrap.querySelector("h1").textContent = ex.name;
+      wrap.appendChild(el('<p class="sub"></p>'));
+      wrap.querySelector(".sub").textContent = "Target " + ex.repRange + " · rest " + ex.rest;
+
+      const chips = el('<div class="sets"></div>');
+      for (let i = 0; i < ex.sets; i++) {
+        const s = sets[i];
+        const filled = !!(s.weight && s.reps);
+        const chip = el('<button class="setchip" type="button"><div></div><small></small></button>');
+        if (i === state.activeSet) chip.classList.add("active");
+        if (filled) chip.classList.add("filled");
+        chip.querySelector("div").textContent = "Set " + (i + 1);
+        chip.querySelector("small").textContent = filled ? (s.weight + " × " + s.reps) : (i === state.activeSet ? "now" : "—");
+        chip.onclick = () => { state.activeSet = i; state.toast = ""; render(); };
+        chips.appendChild(chip);
+      }
+      wrap.appendChild(chips);
+
+      const card = el('<div class="card gold"><div class="label" style="margin-bottom:12px;font-size:18px"></div><div class="fields"></div></div>');
+      card.querySelector(".label").textContent = "Set " + (state.activeSet + 1);
+      const fields = card.querySelector(".fields");
+      const w = el('<label class="field"><span>Weight (kg)</span><input inputmode="decimal" /></label>');
+      const r = el('<label class="field"><span>Reps</span><input inputmode="numeric" /></label>');
+      w.querySelector("input").value = sets[state.activeSet].weight;
+      r.querySelector("input").value = sets[state.activeSet].reps;
+      w.querySelector("input").oninput = (e) => { sets[state.activeSet].weight = e.target.value; persist(); };
+      r.querySelector("input").oninput = (e) => { sets[state.activeSet].reps = e.target.value; persist(); };
+      fields.appendChild(w); fields.appendChild(r);
+      if (state.activeSet > 0) {
+        const copy = el('<button class="btn quiet" type="button">Same as previous set</button>');
+        copy.onclick = () => {
+          const prev = sets[state.activeSet - 1];
+          sets[state.activeSet].weight = prev.weight;
+          sets[state.activeSet].reps = prev.reps;
+          state.toast = "Copied from set " + state.activeSet;
+          persist();
+        };
+        card.appendChild(copy);
+      }
+      wrap.appendChild(card);
+
+      if (state.toast) {
+        const t = el('<div class="toast"></div>');
+        t.textContent = state.toast;
+        wrap.appendChild(t);
+      }
+
+      const activeFilled = !!(sets[state.activeSet].weight && sets[state.activeSet].reps);
+      const next = el('<button class="btn primary" type="button"></button>');
+      const lastSet = state.activeSet >= ex.sets - 1;
+      const lastEx = state.exIndex >= d.exercises.length - 1;
+      next.textContent = !lastSet ? "Save set · next set" : (!lastEx ? "Save · next exercise" : "Save · finish workout");
+      next.disabled = !activeFilled;
+      next.onclick = () => {
+        if (!lastSet) {
+          state.activeSet += 1;
+          state.toast = "Set " + state.activeSet + " done";
+          render();
+          return;
+        }
+        if (!lastEx) {
+          state.exIndex += 1;
+          state.activeSet = 0;
+          state.toast = "Up next: " + d.exercises[state.exIndex].name;
+          render();
+          return;
+        }
+        finishSession();
+        state.toast = "";
+        state.screen = "done";
+        render();
+      };
+      wrap.appendChild(next);
+
+      if (!lastEx) {
+        const n = el('<p class="sub" style="margin-top:14px"></p>');
+        n.textContent = "Next: " + d.exercises[state.exIndex + 1].name;
+        wrap.appendChild(n);
+      }
+      return wrap;
+    }
+
+    function viewSteps() {
+      const dates = weekDates();
+      const wrap = el('<div></div>');
+      const back = el('<button class="btn quiet" type="button">‹ Workout guide</button>');
+      back.onclick = () => { state.screen = "home"; render(); };
+      wrap.appendChild(back);
+      wrap.appendChild(el('<div style="margin-top:14px"><span class="pill">Steps</span></div>'));
+      const h = el('<h1 style="margin-top:10px"></h1>');
+      h.textContent = WEEK_FULL[state.stepsDay];
+      wrap.appendChild(h);
+      const sub = el('<p class="sub"></p>');
+      sub.textContent = dates[state.stepsDay].toLocaleDateString("en-AU", { day: "numeric", month: "short" });
+      wrap.appendChild(sub);
+      const week = el('<div class="week" style="margin-bottom:14px"></div>');
+      WEEK.forEach((w, i) => {
+        const chip = el('<button class="daychip" type="button"></button>');
+        chip.textContent = w;
+        if (i === state.stepsDay) chip.classList.add("sel");
+        chip.onclick = () => openSteps(i);
+        week.appendChild(chip);
+      });
+      wrap.appendChild(week);
+      const card = el('<div class="card gold"><label class="field"><span>Steps</span><input inputmode="numeric" placeholder="e.g. 10240" /></label></div>');
+      const input = card.querySelector("input");
+      input.value = state.draftSteps;
+      wrap.appendChild(card);
+      const saveBtn = el('<button class="btn primary" type="button">Save steps</button>');
+      saveBtn.disabled = !state.draftSteps.trim();
+      input.oninput = (e) => { state.draftSteps = e.target.value; saveBtn.disabled = !state.draftSteps.trim(); };
+      saveBtn.onclick = () => {
+        stepsStore()[dateKey(dates[state.stepsDay])] = state.draftSteps.trim();
+        save(state.data);
+        state.screen = "home";
+        render();
+      };
+      wrap.appendChild(saveBtn);
+      return wrap;
+    }
+
+    function viewDone() {
+      const d = day();
+      const wrap = el('<div></div>');
+      wrap.appendChild(el('<span class="pill"></span>'));
+      wrap.querySelector(".pill").textContent = d.weekday + " · " + d.label;
+      wrap.appendChild(el('<h1 style="margin-top:12px;margin-bottom:14px">Session locked <span class="tick">✓</span></h1>'));
+      d.exercises.forEach((ex) => {
+        const sets = getSets(ex.id, ex.sets);
+        const card = el('<div class="card sky"><div class="label" style="margin-bottom:8px;font-size:16px"></div></div>');
+        card.querySelector(".label").textContent = ex.name;
+        sets.forEach((s, i) => {
+          const line = el('<div class="logline"><span></span><span class="kg"></span></div>');
+          line.children[0].textContent = "Set " + (i + 1);
+          line.children[1].textContent = (s.weight || "—") + " kg × " + (s.reps || "—");
+          card.appendChild(line);
+        });
+        wrap.appendChild(card);
+      });
+      const home = el('<button class="btn primary" type="button">Back to workout guide</button>');
+      home.onclick = () => { state.screen = "home"; render(); };
+      wrap.appendChild(home);
+      return wrap;
+    }
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/60-day-lockin/sw.js", { scope: "/60-day-lockin/" }).catch(() => {});
+    }
+    try { history.replaceState({ screen: "progress" }, "", location.href); } catch (e) {}
+    render();
+  </script>
+</body>
+</html>
